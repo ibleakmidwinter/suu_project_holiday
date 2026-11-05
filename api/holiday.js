@@ -27,13 +27,24 @@ const RESULT_MESSAGES = {
   "99": "알 수 없는 오류가 발생했습니다. 잠시 후 다시 시도해주세요."
 };
 
-// 환경변수에 Encoding 키를 넣었더라도 Decoding 상태로 되돌린다
+// 환경변수 값의 앞뒤 공백을 없애고, Encoding 키를 넣었더라도 Decoding 상태로 되돌린다
 function normalizeKey(rawKey) {
+  const trimmed = String(rawKey).trim();      // 붙여넣을 때 섞여 들어간 공백·줄바꿈을 없앤다
   try {
-    return decodeURIComponent(rawKey);   // %가 섞인 Encoding 키라면 원래 값으로 돌아온다
+    return decodeURIComponent(trimmed);       // %가 섞인 Encoding 키라면 원래 값으로 돌아온다
   } catch {
-    return rawKey;                       // 디코딩이 불가능한 형태면 그대로 쓴다
+    return trimmed;                           // 디코딩이 불가능한 형태면 그대로 쓴다
   }
+}
+
+// 인증키 오류일 때 키 자체를 노출하지 않고 모양만 알려주는 진단 정보를 만든다
+function describeKey(key) {
+  return {
+    길이: key.length,                                   // 정상이라면 64자다
+    형식: /^[0-9a-zA-Z+/=%._-]+$/.test(key) ? "정상 문자" : "허용되지 않는 문자 포함",
+    공백포함: /\s/.test(key),                            // 가운데에 공백이 끼었는지 본다
+    끝4자리: key.length >= 4 ? key.slice(-4) : "짧음"     // 어느 키인지 구분할 수 있게 끝 4자리만 보여준다
+  };
 }
 
 // 이 API 는 결과가 0건이면 items 가 빈 문자열, 1건이면 객체, 여러건이면 배열로 와서 모양을 통일해야 한다
@@ -143,7 +154,9 @@ export default async function handler(req, res) {
     if (error.name === "TimeoutError" || error.name === "AbortError") {
       return res.status(504).json({ ok: false, message: "특일 정보 서버에 연결하지 못했습니다. 잠시 후 다시 시도해주세요." });
     }
-    // 그 밖의 오류는 위에서 만든 한국어 문구를 그대로 전달한다
-    return res.status(502).json({ ok: false, message: error.message || "정보를 불러오지 못했습니다." });
+    // 인증키 문제로 보이는 오류에는 키의 모양만 덧붙여 원인을 찾기 쉽게 한다
+    const payload = { ok: false, message: error.message || "정보를 불러오지 못했습니다." };
+    if (String(error.message).includes("인증키")) payload.진단 = describeKey(key);
+    return res.status(502).json(payload);
   }
 }
