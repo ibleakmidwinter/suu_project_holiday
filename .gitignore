@@ -1,0 +1,17 @@
+# 로컬 환경변수 파일 — 인증키가 들어 있으므로 절대 깃허브에 올리지 않는다
+.env
+.env.*
+!.env.example
+
+# Vercel CLI 가 만드는 로컬 설정 폴더다
+.vercel
+
+# npm 패키지 폴더다
+node_modules/
+
+# 맥에서 자동으로 생기는 파일이다
+.DS_Store
+
+# 각종 로그 파일이다
+*.log
+npm-debug.log*

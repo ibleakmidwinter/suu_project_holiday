@@ -1,0 +1,331 @@
+/* 모든 요소의 기본 여백을 없애고 박스 계산 방식을 통일한다 */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+/* 자주 쓰는 색을 변수로 모아 관리한다 */
+:root {
+  --red: #d93025;       /* 공휴일(빨간날) 색이다 */
+  --blue: #2b7fd4;      /* 토요일 색이다 */
+  --green: #27ae60;     /* 기념일 색이다 */
+  --amber: #e8820c;     /* 24절기 색이다 */
+  --purple: #8e5fd0;    /* 잡절 색이다 */
+  --bg: #f4f6f8;        /* 페이지 배경색이다 */
+  --card: #ffffff;      /* 카드 배경색이다 */
+  --text: #202528;      /* 기본 글자색이다 */
+  --muted: #5f6872;     /* 흐린 글자색이다 */
+  --line: #e4e8ec;      /* 선 색이다 */
+}
+
+/* 페이지 전체의 기본 글꼴과 배경을 정한다 */
+body {
+  font-family: "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+  -webkit-text-size-adjust: 100%; /* 모바일에서 글자가 임의로 커지지 않게 한다 */
+}
+
+/* 내용의 최대 폭을 제한하고 가운데 정렬한다 */
+.wrap {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 20px 16px 40px; /* 좌우 16px 여백으로 모바일에서도 글자가 붙지 않게 한다 */
+}
+
+/* 제목과 드롭다운을 한 줄에 배치하되 좁은 화면에서는 줄바꿈된다 */
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+/* 앱 제목 글자 크기를 화면 폭에 따라 유연하게 조절한다 */
+.title { font-size: clamp(1.25rem, 4vw, 1.75rem); font-weight: 700; }
+
+/* 오늘이 있는 달로 되돌아가는 버튼이다 */
+.today-btn {
+  padding: 8px 16px;
+  font-size: 0.9rem;
+  font-family: inherit;
+  font-weight: 600;
+  color: var(--text);
+  background: var(--card);
+  border: 1px solid #ccd2d8;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+/* 오늘 버튼에 마우스를 올렸을 때 살짝 어둡게 한다 */
+.today-btn:hover { background: #eef1f4; }
+
+/* 화살표와 연·월 글자를 한 줄에 배치하는 이동 막대다 */
+.monthnav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  background: var(--card);
+  border-radius: 14px;
+  padding: 6px 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+  margin-bottom: 14px;
+}
+
+/* 좌우 화살표 버튼의 모양이다 */
+.arrow {
+  flex: 0 0 auto;
+  width: 44px;
+  height: 44px;
+  font-size: 1.8rem;
+  line-height: 1;
+  font-family: inherit;
+  color: var(--text);
+  background: transparent;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+/* 화살표에 마우스를 올렸을 때 배경을 넣어 눌리는 느낌을 준다 */
+.arrow:hover { background: #eef1f4; }
+
+/* 화살표를 누르는 순간 살짝 줄어들게 한다 */
+.arrow:active { transform: scale(0.9); }
+
+/* 화살표에 키보드 포커스가 갔을 때 테두리를 강조한다 */
+.arrow:focus-visible, .today-btn:focus-visible { outline: 2px solid var(--blue); outline-offset: 1px; }
+
+/* 가운데 연·월 글자다 */
+.monthnav-label {
+  flex: 1;
+  text-align: center;
+  font-size: clamp(1.05rem, 4.5vw, 1.35rem);
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  user-select: none; /* 좌우로 밀 때 글자가 선택되지 않게 한다 */
+}
+
+/* 달을 넘길 때 좌우로 미끄러지는 영역이다 */
+.stage {
+  overflow-x: hidden;              /* 미끄러져 나간 내용이 가로로 넘치지 않게 가린다 */
+  touch-action: pan-y;             /* 세로 스크롤은 살리고 가로 밀기는 직접 처리한다 */
+}
+
+/* 다음 달로 갈 때 오른쪽에서 들어오는 움직임이다 */
+.stage.in-next { animation: slide-in-next 0.26s ease-out; }
+
+/* 이전 달로 갈 때 왼쪽에서 들어오는 움직임이다 */
+.stage.in-prev { animation: slide-in-prev 0.26s ease-out; }
+
+/* 오른쪽 밖에서 제자리로 들어오는 동작을 정의한다 */
+@keyframes slide-in-next {
+  from { transform: translateX(28%); opacity: 0; }
+  to   { transform: translateX(0);   opacity: 1; }
+}
+
+/* 왼쪽 밖에서 제자리로 들어오는 동작을 정의한다 */
+@keyframes slide-in-prev {
+  from { transform: translateX(-28%); opacity: 0; }
+  to   { transform: translateX(0);    opacity: 1; }
+}
+
+/* 손가락으로 밀고 있는 동안에는 애니메이션 없이 손가락을 따라가게 한다 */
+.stage.dragging { transition: none; }
+
+/* 조작 방법 안내 문구다 */
+.hint { text-align: center; font-size: 0.8rem; color: #98a0a8; margin-top: 10px; }
+
+/* 쉬는 날 수를 보여주는 요약 카드다 */
+.summary {
+  background: var(--card);
+  border-radius: 16px;
+  padding: 22px 16px;
+  text-align: center;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+  border-top: 6px solid var(--red);
+  margin-bottom: 16px;
+}
+
+/* 요약 카드의 작은 설명 글 스타일이다 */
+.summary-label { font-size: 0.9rem; color: var(--muted); }
+
+/* 쉬는 날 수를 아주 큰 숫자로 표시한다 */
+.summary-value {
+  font-size: clamp(2.75rem, 14vw, 4.5rem);
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: var(--red);
+}
+
+/* 요약 카드 아래쪽 보조 문구 스타일이다 */
+.summary-sub { font-size: 0.95rem; color: var(--muted); }
+
+/* 로딩 및 오류 안내 문구 스타일이다 */
+.status { text-align: center; color: var(--muted); font-size: 0.95rem; padding: 8px 0 16px; }
+
+/* 안내 문구가 필요 없을 때 숨기기 위한 클래스다 */
+.status.hidden { display: none; }
+
+/* 오류 상황일 때 문구를 빨간색으로 강조한다 */
+.status.error { color: var(--red); font-weight: 600; }
+
+/* 달력을 감싸는 카드다 */
+.calendar {
+  background: var(--card);
+  border-radius: 16px;
+  padding: 14px 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+  margin-bottom: 16px;
+}
+
+/* 요일 머리글을 일곱 칸으로 나눈다 */
+.weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  text-align: center;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--muted);
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--line);
+}
+
+/* 일요일 머리글은 빨간색이다 */
+.weekdays .sun { color: var(--red); }
+
+/* 토요일 머리글은 파란색이다 */
+.weekdays .sat { color: var(--blue); }
+
+/* 날짜 칸도 일곱 칸으로 나눈다 */
+.days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+  padding-top: 6px;
+}
+
+/* 날짜 한 칸의 기본 모양이다 */
+.day {
+  position: relative;
+  min-height: 52px;
+  padding: 6px 2px 4px;
+  text-align: center;
+  border-radius: 8px;
+  font-size: 0.95rem;
+}
+
+/* 이전·다음 달의 빈 칸이다 */
+.day.empty { background: transparent; }
+
+/* 일요일 날짜는 빨간색으로 보여준다 */
+.day.sun { color: var(--red); }
+
+/* 토요일 날짜는 파란색으로 보여준다 */
+.day.sat { color: var(--blue); }
+
+/* 공휴일(빨간날)은 배경까지 빨갛게 칠해 눈에 띄게 한다 */
+.day.holiday {
+  background: #fdeeed;
+  color: var(--red);
+  font-weight: 800;
+}
+
+/* 오늘 날짜에는 테두리를 둘러 표시한다 */
+.day.today { outline: 2px solid var(--text); outline-offset: -2px; }
+
+/* 날짜 아래에 붙는 짧은 이름이다 */
+.day-name {
+  display: block;
+  margin-top: 2px;
+  font-size: 0.62rem;
+  line-height: 1.2;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 기념일·절기가 있는 날에 찍는 작은 점들이다 */
+.dots { display: flex; justify-content: center; gap: 2px; margin-top: 2px; }
+
+/* 점 하나의 모양이다 */
+.dot { width: 4px; height: 4px; border-radius: 50%; }
+
+/* 기념일 점 색이다 */
+.dot.anniversary { background: var(--green); }
+
+/* 24절기 점 색이다 */
+.dot.division { background: var(--amber); }
+
+/* 잡절 점 색이다 */
+.dot.sundry { background: var(--purple); }
+
+/* 목록 묶음 하나를 감싸는 카드다 */
+.list-card {
+  background: var(--card);
+  border-radius: 14px;
+  padding: 14px 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  margin-bottom: 12px;
+}
+
+/* 목록 제목 스타일이다 */
+.list-title {
+  font-size: 1rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+  padding-left: 10px;
+  border-left: 4px solid var(--line);
+}
+
+/* 종류별로 목록 제목의 왼쪽 선 색을 다르게 한다 */
+.list-card.holidays .list-title { border-left-color: var(--red); }
+.list-card.anniversaries .list-title { border-left-color: var(--green); }
+.list-card.divisions .list-title { border-left-color: var(--amber); }
+.list-card.sundries .list-title { border-left-color: var(--purple); }
+
+/* 목록의 한 줄(날짜 + 이름)을 양끝 정렬한다 */
+.list-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 6px 0;
+  border-top: 1px solid var(--line);
+  font-size: 0.95rem;
+}
+
+/* 첫 줄에는 위쪽 선을 넣지 않는다 */
+.list-row:first-of-type { border-top: none; }
+
+/* 날짜 부분은 줄바꿈되지 않게 한다 */
+.list-row .date { color: var(--muted); font-size: 0.88rem; white-space: nowrap; }
+
+/* 이름 부분을 굵게 보여준다 */
+.list-row .name { font-weight: 600; flex: 1; }
+
+/* 공휴일 목록의 이름은 빨간색으로 강조한다 */
+.list-card.holidays .list-row .name { color: var(--red); }
+
+/* 자료가 없을 때 보여줄 문구다 */
+.empty-text { color: var(--muted); font-size: 0.9rem; }
+
+/* 하단 출처 표기 스타일이다 */
+.footer { margin-top: 24px; text-align: center; font-size: 0.8rem; color: #868e96; }
+
+/* 화면이 좁을 때는 날짜 칸을 조금 줄인다 */
+@media (max-width: 420px) {
+  .day { min-height: 46px; font-size: 0.88rem; }
+  .day-name { font-size: 0.55rem; }
+  .arrow { width: 40px; height: 40px; font-size: 1.6rem; }
+}
+
+/* 움직임을 줄이도록 설정한 사용자에게는 슬라이드 애니메이션을 끈다 */
+@media (prefers-reduced-motion: reduce) {
+  .stage.in-next, .stage.in-prev { animation: none; }
+  .arrow:active { transform: none; }
+}

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<!-- 문서 언어를 한국어로 지정한다 -->
+<html lang="ko">
+<head>
+  <!-- 한글이 깨지지 않도록 문자 인코딩을 UTF-8로 설정한다 -->
+  <meta charset="UTF-8" />
+  <!-- 휴대폰에서 화면 폭에 맞게 보이도록 뷰포트를 설정한다 -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- 브라우저 탭에 표시될 제목이다 -->
+  <title>빨간날 달력</title>
+  <!-- 외부 스타일시트를 연결한다 -->
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- 전체 내용을 감싸는 컨테이너다 -->
+  <div class="wrap">
+
+    <!-- 상단 머리말이다 -->
+    <header class="header">
+      <!-- 앱 제목이다 -->
+      <h1 class="title">빨간날 달력</h1>
+      <!-- 오늘이 있는 달로 되돌아가는 버튼이다 -->
+      <button type="button" class="today-btn" id="todayBtn">오늘</button>
+    </header>
+
+    <!-- 화살표로 달을 넘기는 이동 막대다 -->
+    <nav class="monthnav">
+      <!-- 이전 달로 가는 화살표다 -->
+      <button type="button" class="arrow" id="prevBtn" aria-label="이전 달">‹</button>
+      <!-- 현재 보고 있는 연·월을 보여준다 -->
+      <h2 class="monthnav-label" id="monthLabel">----년 --월</h2>
+      <!-- 다음 달로 가는 화살표다 -->
+      <button type="button" class="arrow" id="nextBtn" aria-label="다음 달">›</button>
+    </nav>
+
+    <!-- 로딩 중이거나 오류일 때 안내 문구를 보여주는 영역이다 -->
+    <p class="status" id="status">달력을 불러오는 중입니다...</p>
+
+    <!-- 달을 넘길 때 좌우로 미끄러지는 영역이다 -->
+    <div class="stage" id="stage">
+
+      <!-- 이번 달 쉬는 날 수를 크게 보여주는 요약 영역이다 -->
+      <section class="summary" id="summary">
+        <!-- 요약 영역의 작은 설명 글이다 -->
+        <p class="summary-label" id="summaryLabel">쉬는 날</p>
+        <!-- 쉬는 날 수를 큰 숫자로 보여준다 -->
+        <p class="summary-value" id="summaryValue">--</p>
+        <!-- 계산 근거를 밝히는 보조 문구다 -->
+        <p class="summary-sub" id="summarySub">일</p>
+      </section>
+
+      <!-- 달력을 그리는 영역이다 -->
+      <section class="calendar" id="calendar" hidden>
+        <!-- 요일 머리글 일곱 칸이다 -->
+        <div class="weekdays">
+          <span class="sun">일</span><span>월</span><span>화</span><span>수</span>
+          <span>목</span><span>금</span><span class="sat">토</span>
+        </div>
+        <!-- 날짜 칸들이 들어갈 자리다 -->
+        <div class="days" id="days"></div>
+      </section>
+
+      <!-- 공휴일·기념일·절기 목록이 들어갈 자리다 -->
+      <main id="lists"></main>
+
+    </div>
+
+    <!-- 조작 방법을 알려주는 짧은 안내다 -->
+    <p class="hint">화살표를 누르거나, 좌우로 밀어서 달을 넘기세요</p>
+
+    <!-- 하단 출처 표기 영역이다 -->
+    <footer class="footer">
+      <!-- 데이터 출처를 밝힌다 -->
+      <p>자료 출처: 한국천문연구원 특일 정보</p>
+    </footer>
+
+  </div>
+
+  <!-- 자바스크립트 파일을 연결한다 (HTML 파싱 후 실행되도록 defer를 쓴다) -->
+  <script defer src="app.js"></script>
+</body>
+</html>
